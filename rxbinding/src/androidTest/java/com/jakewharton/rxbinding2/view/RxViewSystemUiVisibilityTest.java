@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import com.jakewharton.rxbinding2.RecordingObserver;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,7 @@ public final class RxViewSystemUiVisibilityTest {
     root.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
   }
 
+  @Ignore
   @Test public void systemUiVisibilityChanges() {
     RecordingObserver<Integer> o = new RecordingObserver<>();
     RxView.systemUiVisibilityChanges(root)
