@@ -12,29 +12,22 @@ import static io.reactivex.android.MainThreadDisposable.verifyMainThread;
 
 final class SnackbarActionObservable extends Observable<View> {
   final Snackbar view;
-  final int resId;
-  final CharSequence text;
+  final SetActionStrategy strategy;
 
   public SnackbarActionObservable(Snackbar view, int resId) {
     this.view = view;
-    this.text = null;
-    this.resId = resId;
+    this.strategy = new ResIdSetActionStrategy(resId);
   }
   public SnackbarActionObservable(Snackbar view, CharSequence text) {
     this.view = view;
-    this.text = text;
-    this.resId = -1;
+    this.strategy = new TextSetActionStrategy(text);
   }
 
   @Override protected void subscribeActual(Observer<? super View> observer) {
     verifyMainThread();
     Listener listener = new Listener(view, observer);
     observer.onSubscribe(listener);
-    if (text == null) {
-      view.setAction(resId, listener.callback);
-    } else {
-      view.setAction(text, listener.callback);
-    }
+    strategy.setAction(listener.callback);
   }
 
   final class Listener extends MainThreadDisposable {
@@ -54,11 +47,37 @@ final class SnackbarActionObservable extends Observable<View> {
     }
 
     @Override protected void onDispose() {
-      if (text == null) {
-        snackbar.setAction(resId, null);
-      } else {
-        snackbar.setAction(text, null);
-      }
+      strategy.setAction(null);
+    }
+  }
+
+  interface SetActionStrategy {
+    void setAction(OnClickListener listener);
+  }
+
+  final class TextSetActionStrategy implements SetActionStrategy {
+
+    private final CharSequence text;
+
+    TextSetActionStrategy(CharSequence text) {
+      this.text = text;
+    }
+
+    @Override public void setAction(OnClickListener listener) {
+      view.setAction(text, listener);
+    }
+  }
+
+  final class ResIdSetActionStrategy implements SetActionStrategy {
+
+    private final int resId;
+
+    ResIdSetActionStrategy(int resId) {
+      this.resId = resId;
+    }
+
+    @Override public void setAction(OnClickListener listener) {
+      view.setAction(resId, listener);
     }
   }
 }
