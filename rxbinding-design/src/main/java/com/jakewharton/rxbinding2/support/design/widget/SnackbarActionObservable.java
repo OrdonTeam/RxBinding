@@ -25,17 +25,17 @@ final class SnackbarActionObservable extends Observable<View> {
 
   @Override protected void subscribeActual(Observer<? super View> observer) {
     verifyMainThread();
-    Listener listener = new Listener(view, observer);
+    Listener listener = new Listener(strategy, observer);
     observer.onSubscribe(listener);
     strategy.setAction(listener.callback);
   }
 
   final class Listener extends MainThreadDisposable {
-    private final Snackbar snackbar;
+    private final SetActionStrategy strategy;
     private final OnClickListener callback;
 
-    Listener(Snackbar snackbar, final Observer<? super View> observer) {
-      this.snackbar = snackbar;
+    Listener(SetActionStrategy strategy, final Observer<? super View> observer) {
+      this.strategy = strategy;
       this.callback = new OnClickListener() {
         @Override
         public void onClick(View view) {
