@@ -9,28 +9,12 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.AnnotationExpr
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr
 import com.github.javaparser.ast.expr.NameExpr
-import com.github.javaparser.ast.type.ClassOrInterfaceType
-import com.github.javaparser.ast.type.PrimitiveType
-import com.github.javaparser.ast.type.ReferenceType
-import com.github.javaparser.ast.type.Type
-import com.github.javaparser.ast.type.VoidType
-import com.github.javaparser.ast.type.WildcardType
+import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr
+import com.github.javaparser.ast.type.*
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
-import com.squareup.kotlinpoet.ANY
-import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.AnnotationSpec.UseSiteTarget.FILE
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.INT
 import com.squareup.kotlinpoet.KModifier.INLINE
-import com.squareup.kotlinpoet.KotlinFile
-import com.squareup.kotlinpoet.ParameterSpec
-import com.squareup.kotlinpoet.ParameterizedTypeName
-import com.squareup.kotlinpoet.TypeName
-import com.squareup.kotlinpoet.TypeVariableName
-import com.squareup.kotlinpoet.UNIT
-import com.squareup.kotlinpoet.WildcardTypeName
-import com.squareup.kotlinpoet.asClassName
 import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
@@ -331,6 +315,7 @@ open class KotlinGenTask : SourceTask() {
       return FunSpec.builder(name)
           .receiver(extendedClass)
           .addKdoc(comment ?: "")
+          .addAnnotations(annotations.toAnnotationSpec())
           .addModifiers(INLINE)
           .apply {
             typeParameters?.let { addTypeVariables(it) }
@@ -354,5 +339,27 @@ open class KotlinGenTask : SourceTask() {
 
     fun emitsUnit() = kotlinType == UNIT_OBSERVABLE
 
+    private fun List<AnnotationExpr>.toAnnotationSpec(): Iterable<AnnotationSpec> {
+      return filterNot { it.name.toString() == "NonNull" }
+          .filterNot { it == GenericTypeNullableAnnotation }
+          .map { it.annotationSpec() }
+    }
+
+    private fun AnnotationExpr.annotationSpec(): AnnotationSpec {
+      return when (this.name.toString()) {
+        "CheckResult" -> checkResultAnnotationSpec()
+        "RequiresApi" -> requiresApiAnnotationSpec()
+        else -> throw UnsupportedOperationException()
+      }
+    }
+
+    private fun checkResultAnnotationSpec() =
+        AnnotationSpec.builder(ClassName.bestGuess("android.support.annotation.CheckResult")).build()
+
+    private fun AnnotationExpr.requiresApiAnnotationSpec() =
+        AnnotationSpec.builder(ClassName.bestGuess("android.support.annotation.RequiresApi"))
+            .addMember("value", "%L", apiVersion()).build()
+
+    private fun AnnotationExpr.apiVersion() = "android.os.Build.VERSION_CODES."+(this as SingleMemberAnnotationExpr).memberValue
   }
 }
