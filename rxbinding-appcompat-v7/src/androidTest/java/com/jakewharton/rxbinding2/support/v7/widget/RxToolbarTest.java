@@ -71,6 +71,66 @@ public final class RxToolbarTest {
     o.assertNoMoreEvents();
   }
 
+  @Test public void navigationClicks2() {
+    navigationClicks();
+  }
+
+  @Test public void navigationClicks3() {
+    navigationClicks();
+  }
+
+  @Test public void navigationClicks4() {
+    navigationClicks();
+  }
+
+  @Test public void navigationClicks5() {
+    navigationClicks();
+  }
+
+  @Test public void navigationClicks6() {
+    navigationClicks();
+  }
+
+  @Test public void navigationClicks7() {
+    navigationClicks();
+  }
+
+  @Test public void navigationClicks8() {
+    navigationClicks();
+  }
+
+  @Test public void navigationClicks9() {
+    navigationClicks();
+  }
+
+  @Test public void navigationClicks10() {
+    navigationClicks();
+  }
+
+  @Test public void navigationClicks11() {
+    navigationClicks();
+  }
+
+  @Test public void navigationClicks12() {
+    navigationClicks();
+  }
+
+  @Test public void navigationClicks13() {
+    navigationClicks();
+  }
+
+  @Test public void navigationClicks14() {
+    navigationClicks();
+  }
+
+  @Test public void navigationClicks15() {
+    navigationClicks();
+  }
+
+  @Test public void navigationClicks16() {
+    navigationClicks();
+  }
+
   @Test @UiThreadTest public void title() throws Exception {
     RxToolbar.title(view).accept("Hey");
     assertEquals("Hey", view.getTitle().toString());
